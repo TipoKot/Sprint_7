@@ -1,9 +1,11 @@
 import requests
 import random
 import string
+import allure
 
 # метод регистрации нового курьера возвращает список из логина и пароля
 # если регистрация не удалась, возвращает пустой список
+@allure.step("Register new courier and return login and password")
 def register_new_courier_and_return_login_password():
     # метод генерирует строку, состоящую только из букв нижнего регистра, в качестве параметра передаём длину строки
     def generate_random_string(length):
@@ -37,3 +39,17 @@ def register_new_courier_and_return_login_password():
 
     # возвращаем список
     return login_pass
+
+@allure.step("Delete courier by login and password")
+def delete_courier_by_login_and_password(login, password):
+    payload = {
+        "login": login,
+        "password": password
+    }
+    response = requests.post('https://qa-scooter.praktikum-services.ru/api/v1/courier/login', data=payload)
+    
+    if response.status_code == 200:
+        courier_id = response.json().get("id")
+        delete_response = requests.delete(f'https://qa-scooter.praktikum-services.ru/api/v1/courier/{courier_id}')
+        return delete_response.status_code == 200
+    return False
